@@ -68,13 +68,13 @@ Byte encoded sequence in the following form:
    |                         node (2-5)                            |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
-type UUID []byte
+type UUID [16]byte
 
 type uuidTime int64
 
 // Makes a copy of the UUID. Assumes the provided UUID is valid
-func Copy(uuid UUID) UUID {
-	dup, _ := NewBytes(uuid)
+func Copy(uuid *UUID) UUID {
+	dup, _ := NewBytes((*uuid)[:])
 	return dup
 }
 
@@ -87,7 +87,7 @@ func Copy(uuid UUID) UUID {
 // bytes of the new UUID will be 0x08000000a0b0c0d.
 func NewTimeBytes(t time.Time, bytes []byte) (UUID, error) {
 	if len(bytes) > size {
-		return nil, errLength
+		return UUID{}, errLength
 	}
 
 	me := make([]byte, size)
@@ -102,21 +102,28 @@ func NewTimeBytes(t time.Time, bytes []byte) (UUID, error) {
 	copy(me[8+8-len(bytes):size], bytes[:len(bytes)])
 	me[8] = me[8]&0x0f | variant8<<4
 
-	return UUID(me), nil
+	return bytesToUUID(me), nil
+}
+
+func bytesToUUID(b []byte) (uuid UUID) {
+	for i := range uuid {
+		uuid[i] = b[i]
+	}
+	return uuid
 }
 
 // Allocate a UUID from a 16 byte sequence.  This can take any version,
 // although versions other than 1 will not have a meaningful time component.
 func NewBytes(bytes []byte) (UUID, error) {
 	if len(bytes) != size {
-		return nil, errLength
+		return UUID{}, errLength
 	}
 
 	// Copy out this slice so not to hold a reference to the container
 	b := make([]byte, size)
 	copy(b, bytes[0:size])
 
-	return UUID(b), nil
+	return bytesToUUID(b), nil
 }
 
 // Allocate a new UUID from a time, encoding the timestamp from the UTC
@@ -125,10 +132,10 @@ func NewTime(t time.Time) (UUID, error) {
 	rnd := make([]byte, 8)
 	n, err := io.ReadFull(rand.Reader, rnd)
 	if n != len(rnd) {
-		return nil, errLength
+		return UUID{}, errLength
 	}
 	if err != nil {
-		return nil, err
+		return UUID{}, err
 	}
 	return NewTimeBytes(t, rnd)
 }
@@ -141,16 +148,16 @@ func NewString(s string) (UUID, error) {
 	normalized := strings.Replace(s, "-", "", -1)
 
 	if hex.DecodedLen(len(normalized)) != size {
-		return nil, errLength
+		return UUID{}, errLength
 	}
 
 	bytes, err := hex.DecodeString(normalized)
 
 	if err != nil {
-		return nil, err
+		return UUID{}, err
 	}
 
-	return UUID(bytes), nil
+	return bytesToUUID(bytes), nil
 }
 
 // The time section of the UUID in the UTC timezone
@@ -227,7 +234,7 @@ func (me UUID) Compare(other UUID) int {
 
 // The underlying byte slice.  Treat the slice returned as immutable.
 func (me UUID) Bytes() []byte {
-	return me
+	return me[:]
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.

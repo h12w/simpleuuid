@@ -225,15 +225,15 @@ func TestCompare(t *testing.T) {
 		t.Error(err)
 	}
 
-	if bytes.Compare(u1, u2) != 0 {
+	if bytes.Compare(u1[:], u2[:]) != 0 {
 		t.Error("Should be equal", u1, u2)
 	}
 
-	if bytes.Compare(u1, u3) <= 0 {
+	if bytes.Compare(u1[:], u3[:]) <= 0 {
 		t.Error("Should be greater", u1, u3)
 	}
 
-	if bytes.Compare(u3, u1) >= 0 {
+	if bytes.Compare(u3[:], u1[:]) >= 0 {
 		t.Error("Should be less", u1, u3)
 	}
 }
@@ -287,7 +287,7 @@ func TestRoundTripOfTimeBytes(t *testing.T) {
 		bs := []byte{b, b, b, b, b, b, b, b}
 
 		ut, _ := NewTimeBytes(time, bs)
-		ub, _ := NewBytes([]byte(ut))
+		ub, _ := NewBytes(ut[:])
 
 		return bytes.Compare(ut[8:], ub[8:]) == 0
 	}
@@ -313,12 +313,12 @@ func TestZeroPaddedRightAlignmentOfTimeBytes(t *testing.T) {
 		for i, j := 15, len(bs)-1; i >= 8; i, j = i-1, j-1 {
 			if j >= 0 {
 				if bs[j]&0x0f != u[i]&0x0f {
-					t.Log("expected right aligned %d to equal %d", j, i)
+					t.Logf("expected right aligned %d to equal %d", j, i)
 					return false
 				}
 			} else {
 				if u[i]&0x0f != 0 {
-					t.Log("expected right %d be zero", i)
+					t.Logf("expected right %d be zero", i)
 					return false
 				}
 			}
