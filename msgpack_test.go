@@ -1,6 +1,8 @@
 package uuid
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -43,4 +45,29 @@ func TestFailed(t *testing.T) {
 	if u != v {
 		t.Fatalf("expect %v, got %v", u, v)
 	}
+}
+
+type S struct {
+	ID UUID
+}
+
+func TestToJSON(t *testing.T) {
+	var s S
+	s.ID, _ = NewTime(time.Now())
+	buf, err := msgpack.Marshal(&s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(s.ID)
+	fmt.Println(len(buf))
+	m := make(map[string]interface{})
+	if err := msgpack.Unmarshal(buf, &m); err != nil {
+		t.Fatal(err)
+	}
+	buf, err = json.Marshal(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(string(buf))
+
 }

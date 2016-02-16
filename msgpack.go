@@ -9,5 +9,5 @@ var (
 )
 
 func init() {
-	msgpack.RegisterExt(MsgPackID, &UUID{})
+	msgpack.RegisterExt(MsgPackID, UUID{})
 }
