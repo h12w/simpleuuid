@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package simpleuuid
+package uuid
 
 import (
 	"bytes"
@@ -35,7 +35,7 @@ import (
 var (
 	zero      = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 	url       = []byte{0x6b, 0xa7, 0xb8, 0x11, 0x9d, 0xad, 0x11, 0xd1, 0x80, 0xb4, 0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8}
-	urlString = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
+	urlString = "6ba7b8119dad11d180b400c04fd430c8"
 )
 
 func TestNewBytes(t *testing.T) {
@@ -367,7 +367,7 @@ func TestOrdering(t *testing.T) {
 // xxxxxxxx-xxxx-1xxx-yxxx-xxxxxxxxxxxx y::{8 9 a b}
 // 012345678901234567890123456789012345
 func hasVersionAndVariantDigitsInString(u UUID) bool {
-	s := u.String()
+	s := u.HyphenString()
 	return s[14] == '1' &&
 		(s[19] == '8' ||
 			s[19] == '9' ||

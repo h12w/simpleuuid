@@ -28,7 +28,7 @@ The other formats described in RFC 4122 should be parsable either in text or
 byte form, though will not be sortable or likely have a meaningful time
 componenet.
 */
-package simpleuuid
+package uuid
 
 import (
 	"bytes"
