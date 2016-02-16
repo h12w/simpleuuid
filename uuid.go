@@ -213,6 +213,15 @@ func (me UUID) Variant() int8 {
 
 // The timestamp in hex encoded form.
 func (me UUID) String() string {
+	return hex.EncodeToString(me[0:4]) +
+		hex.EncodeToString(me[4:6]) +
+		hex.EncodeToString(me[6:8]) +
+		hex.EncodeToString(me[8:10]) +
+		hex.EncodeToString(me[10:16])
+}
+
+// The timestamp in hyphen hex encoded form.
+func (me UUID) HyphenString() string {
 	return hex.EncodeToString(me[0:4]) + "-" +
 		hex.EncodeToString(me[4:6]) + "-" +
 		hex.EncodeToString(me[6:8]) + "-" +
