@@ -5,13 +5,13 @@ import (
 )
 
 func (id *UUID) SetBSON(raw bson.Raw) error {
-	var bsonID bson.ObjectId
-	if err := raw.Unmarshal(&bsonID); err != nil {
+	var s string
+	if err := raw.Unmarshal(&s); err != nil {
 		return err
 	}
-	return id.UnmarshalText([]byte(bsonID))
+	return id.UnmarshalText([]byte(s))
 }
 
 func (id UUID) GetBSON() (interface{}, error) {
-	return bson.ObjectId(id.String()), nil
+	return id.String(), nil
 }
