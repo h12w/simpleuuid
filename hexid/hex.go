@@ -3,6 +3,8 @@ package hexid
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -33,6 +35,7 @@ func Restore(any interface{}) interface{} {
 		for key, value := range o {
 			o[key] = Restore(value)
 		}
+		return o
 	case map[interface{}]interface{}:
 		m, err := tryStringMap(o)
 		if err != nil {
@@ -75,13 +78,22 @@ func tryTime(a []interface{}) (time.Time, error) {
 	if len(a) != 2 {
 		return time.Time{}, errNotTime
 	}
-	sec, ok := a[0].(uint64)
-	if !ok {
-		return time.Time{}, errNotTime
+	var sec, nsec int64
+	switch n := a[0].(type) {
+	case int:
+		sec = int64(n)
+	case uint64:
+		sec = int64(n)
+	default:
+		return time.Time{}, fmt.Errorf("fail to parse Time.sec of type %v", reflect.TypeOf(a[0]))
 	}
-	nsec, ok := a[1].(uint64)
-	if !ok {
-		return time.Time{}, errNotTime
+	switch n := a[1].(type) {
+	case int:
+		nsec = int64(n)
+	case uint64:
+		nsec = int64(n)
+	default:
+		return time.Time{}, fmt.Errorf("fail to parse Time.sec of type %v", reflect.TypeOf(a[1]))
 	}
 	return time.Unix(int64(sec), int64(nsec)).UTC(), nil
 }
