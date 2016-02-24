@@ -4,10 +4,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"strings"
+	"time"
 )
 
 var (
 	errNotStringMap = errors.New("not a string map")
+	errNotTime      = errors.New("not time.Time")
 )
 
 type hexString []byte
@@ -39,6 +41,14 @@ func Restore(any interface{}) interface{} {
 			}
 		}
 		return Restore(m)
+	case []interface{}:
+		t, err := tryTime(o)
+		if err != nil {
+			return o
+		}
+		return t
+	case time.Time:
+		return o.Format(time.RFC3339Nano)
 	case []byte: // UUID like ID
 		if len(o)%4 == 0 && len(o) <= 16 {
 			return hexString(o)
@@ -57,4 +67,18 @@ func tryStringMap(m map[interface{}]interface{}) (map[string]interface{}, error)
 		strMap[key.(string)] = value
 	}
 	return strMap, nil
+}
+func tryTime(a []interface{}) (time.Time, error) {
+	if len(a) != 2 {
+		return time.Time{}, errNotTime
+	}
+	sec, ok := a[0].(uint64)
+	if !ok {
+		return time.Time{}, errNotTime
+	}
+	nsec, ok := a[1].(uint64)
+	if !ok {
+		return time.Time{}, errNotTime
+	}
+	return time.Unix(int64(sec), int64(nsec)).UTC(), nil
 }
