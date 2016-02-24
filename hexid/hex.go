@@ -44,6 +44,9 @@ func Restore(any interface{}) interface{} {
 	case []interface{}:
 		t, err := tryTime(o)
 		if err != nil {
+			for i := range o {
+				o[i] = Restore(o[i])
+			}
 			return o
 		}
 		return t
