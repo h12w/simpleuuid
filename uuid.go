@@ -68,7 +68,7 @@ Byte encoded sequence in the following form:
    |                         node (2-5)                            |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
-type UUID [16]byte
+type UUID [size]byte
 
 type uuidTime int64
 
@@ -217,7 +217,7 @@ func (me UUID) String() string {
 		hex.EncodeToString(me[4:6]) +
 		hex.EncodeToString(me[6:8]) +
 		hex.EncodeToString(me[8:10]) +
-		hex.EncodeToString(me[10:16])
+		hex.EncodeToString(me[10:size])
 }
 
 // The timestamp in hyphen hex encoded form.
@@ -226,7 +226,7 @@ func (me UUID) HyphenString() string {
 		hex.EncodeToString(me[4:6]) + "-" +
 		hex.EncodeToString(me[6:8]) + "-" +
 		hex.EncodeToString(me[8:10]) + "-" +
-		hex.EncodeToString(me[10:16])
+		hex.EncodeToString(me[10:size])
 }
 
 // Stable comparison, first of the times then of the node values.
@@ -276,4 +276,22 @@ func fromUnixNano(ns int64) uuidTime {
 
 func toUnixNano(t uuidTime) int64 {
 	return int64((t - gregorianEpoch) * 100)
+}
+
+func (id UUID) MarshalText() (text []byte, err error) {
+	return []byte(id.String()), nil
+}
+func (id *UUID) UnmarshalText(text []byte) error {
+	text = bytes.Replace(text, []byte{'-'}, nil, -1)
+	buf, err := hex.DecodeString(string(text))
+	if err != nil {
+		return err
+	}
+	if len(buf) > size {
+		return errLength
+	}
+	for i := range buf {
+		(*id)[i] = buf[i]
+	}
+	return nil
 }
