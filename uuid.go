@@ -38,7 +38,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strings"
 	"time"
 )
 
@@ -90,7 +89,7 @@ func NewTimeBytes(t time.Time, bytes []byte) (UUID, error) {
 		return UUID{}, errLength
 	}
 
-	me := make([]byte, size)
+	var me UUID
 	ts := fromUnixNano(t.UTC().UnixNano())
 
 	// time masked with version
@@ -102,14 +101,7 @@ func NewTimeBytes(t time.Time, bytes []byte) (UUID, error) {
 	copy(me[8+8-len(bytes):size], bytes[:len(bytes)])
 	me[8] = me[8]&0x0f | variant8<<4
 
-	return bytesToUUID(me), nil
-}
-
-func bytesToUUID(b []byte) (uuid UUID) {
-	for i := range uuid {
-		uuid[i] = b[i]
-	}
-	return uuid
+	return me, nil
 }
 
 // Allocate a UUID from a 16 byte sequence.  This can take any version,
@@ -120,24 +112,24 @@ func NewBytes(bytes []byte) (UUID, error) {
 	}
 
 	// Copy out this slice so not to hold a reference to the container
-	b := make([]byte, size)
-	copy(b, bytes[0:size])
+	var b UUID
+	copy(b[:], bytes[0:size])
 
-	return bytesToUUID(b), nil
+	return b, nil
 }
 
 // Allocate a new UUID from a time, encoding the timestamp from the UTC
 // timezone and using a random value for the clock and node.
 func NewTime(t time.Time) (UUID, error) {
-	rnd := make([]byte, 8)
-	n, err := io.ReadFull(rand.Reader, rnd)
+	var rnd [8]byte
+	n, err := io.ReadFull(rand.Reader, rnd[:])
 	if n != len(rnd) {
 		return UUID{}, errLength
 	}
 	if err != nil {
 		return UUID{}, err
 	}
-	return NewTimeBytes(t, rnd)
+	return NewTimeBytes(t, rnd[:])
 }
 
 // Parse and allocate from a string encoded UUID like:
@@ -145,19 +137,18 @@ func NewTime(t time.Time) (UUID, error) {
 // or clock are reasonable values, though it is intended to round trip from a
 // string to a string for all versions of UUIDs.
 func NewString(s string) (UUID, error) {
-	normalized := strings.Replace(s, "-", "", -1)
+	normalized := bytes.Replace([]byte(s), []byte{'-'}, nil, -1)
 
 	if hex.DecodedLen(len(normalized)) != size {
 		return UUID{}, errLength
 	}
 
-	bytes, err := hex.DecodeString(normalized)
-
-	if err != nil {
+	var b UUID
+	if _, err := hex.Decode(b[:], normalized); err != nil {
 		return UUID{}, err
 	}
 
-	return bytesToUUID(bytes), nil
+	return b, nil
 }
 
 // The time section of the UUID in the UTC timezone
