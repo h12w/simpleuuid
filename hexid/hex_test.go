@@ -6,7 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/vmihailenco/msgpack.v2"
+	"h12.me/decimal"
 	"h12.me/uuid"
 )
 
@@ -61,6 +63,24 @@ func TestRestoreTime(t *testing.T) {
 	}
 	v = Restore(v)
 	if !v.(time.Time).Equal(testTime) {
+		t.Fatalf("expect %v, got %v", testTime, v)
+	}
+}
+
+func TestRestoreDecimal(t *testing.T) {
+	d := struct {
+		D decimal.D `bson:"d"`
+	}{D: decimal.Float(1.2)}
+	buf, err := bson.Marshal(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var v interface{}
+	if err := bson.Unmarshal(buf, &v); err != nil {
+		t.Fatal(err)
+	}
+	v = Restore(v)
+	if !v.(bson.M)["d"].(decimal.D).Equal(d.D) {
 		t.Fatalf("expect %v, got %v", testTime, v)
 	}
 }

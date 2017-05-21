@@ -7,6 +7,10 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"h12.me/decimal"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 var (
@@ -31,6 +35,14 @@ func (s *hexString) UnmarshalJSON(bs []byte) error {
 
 func Restore(any interface{}) interface{} {
 	switch o := any.(type) {
+	case bson.M:
+		for key, value := range o {
+			o[key] = Restore(value)
+		}
+		return o
+	case bson.Decimal128:
+		d, _ := decimal.String(o.String())
+		return d
 	case map[string]interface{}:
 		for key, value := range o {
 			o[key] = Restore(value)
