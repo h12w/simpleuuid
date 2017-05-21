@@ -1,3 +1,15 @@
+# h12.me/uuid
+
+This is a modified fork of
+[github.com/streadway/simpleuuid](https://github.com/streadway/simpleuuid).
+
+Modifications:
+
+* use array ([16]byte) instead of slice ([]byte) for the underlying type.
+* use hexidecimal string instead of hyphenated string as default.
+* 
+
+
 # Simple UUIDs
 
 [![Build Status][1]][2]
