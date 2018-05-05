@@ -8,8 +8,8 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/vmihailenco/msgpack.v2"
-	"h12.me/decimal"
-	"h12.me/uuid"
+	"h12.io/decimal"
+	"h12.io/uuid"
 )
 
 var (

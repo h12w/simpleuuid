@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"h12.me/decimal"
+	"h12.io/decimal"
 
 	"gopkg.in/mgo.v2/bson"
 )

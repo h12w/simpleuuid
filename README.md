@@ -1,4 +1,4 @@
-# h12.me/uuid
+# h12.io/uuid
 
 This is a modified fork of
 [github.com/streadway/simpleuuid](https://github.com/streadway/simpleuuid).
